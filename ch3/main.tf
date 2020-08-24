@@ -2,8 +2,9 @@ provider "aws" {
   region = "us-east-2"
 }
 
+
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "terraform-run-state"
+  bucket = "terraform-state-trial-01"
 
   #Prevent accidental deletion of this s3 bucket
   lifecycle {
@@ -34,4 +35,14 @@ resource "aws_dynamodb_table" "terraform_locks" {
     name = "LockID"
     type = "S"
   }
+}
+
+terraform {
+    backend "s3" {
+        bucket = "terraform-run-state-trial-01"
+        key = "global/s3/terraform.tfstate"
+        region = "us-east-2"
+        dynamodb_table = "terraform-state-locks"
+        encrypt = true
+    }
 }

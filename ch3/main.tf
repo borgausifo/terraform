@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-2"
+  region = "us-east-1"
 }
 
 
@@ -38,11 +38,23 @@ resource "aws_dynamodb_table" "terraform_locks" {
 }
 
 terraform {
-    backend "s3" {
-        bucket = "terraform-run-state-trial-01"
-        key = "global/s3/terraform.tfstate"
-        region = "us-east-2"
-        dynamodb_table = "terraform-state-locks"
-        encrypt = true
-    }
+  backend "s3" {
+    bucket         = "terraform-state-trial-01"
+    key            = "global/s3/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "terraform-state-locks"
+    encrypt        = true
+  }
 }
+
+output "s3_bucket_arn" {
+  value       = aws_s3_bucket.terraform_state.arn
+  description = "The ARN of the s3 bucket"
+}
+
+output "dynamodb_table_name" {
+  value       = aws_dynamodb_table.terraform_locks.name
+  description = "The name of the DynamoDB table"
+  depends_on  = []
+}
+

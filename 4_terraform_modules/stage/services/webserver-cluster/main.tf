@@ -5,4 +5,8 @@ provider "aws" {
 module "webserver_cluster" {
 	# Source of the module file located in modules folder
 	source = "../../../modules/services/webserver-cluster"
+
+	cluster_name = "webservers-state"
+	db_remote_state_bucket = "Your bucket name"
+	db_remote_state_key = "stage/data-stores/mysql/terraform.tfstate"
 }

@@ -2,10 +2,17 @@ terraform {
   required_version = ">= 0.12"
 }
 
+locals {
+  http_port = 80
+  any_port = 0
+  any_protocol = "-1"
+  tcp_protocol = "tcp"
+}
+
 resource "aws_launch_configuration" "example" {
     image_id = "ami-0c55b159cbfafe1f0"
     instance_type = var.instance_type
-    security_groups = [aws_secutiry_group.instance.id]
+    security_groups = [aws_security_group.instance.id]
     user_date = data.template_file.user-data.rendered
 
 
@@ -28,17 +35,17 @@ resource "aws_security_group" "alb" {
     name = "${var.cluster_name}-alb"
 
     ingress {
-        from_port = 80
-        to_port = 80
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
+        from_port = local.http_port 
+        to_port = local.http_port
+        protocol = local.tcp_protocol
+        cidr_blocks = local.all_ips 
     }
 
     egress {
-        from_port = 0 
-        to_port = 0
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
+        from_port = local.any_port 
+        to_port = local.any_port 
+        protocol = local.any_protocol 
+        cidr_blocks = local.all_ips 
     }
 }
 
@@ -80,3 +87,20 @@ data "terraform_remote_state" "db" {
         region = "us-east-1"
     }
 }
+
+resource "aws_lb_listener" "http" {
+    load_balancer_arn  = aws_lb.example.arn
+    port = local.http_port 
+    protocol = "HTTP"
+
+    #By default, return a simple 404 page 
+    default_action {
+        type = "fixed-response"
+        fixed_response {
+            content_type = "text/plain"
+            message_body = "404: page not found"
+            status_code = 404
+        }
+    }
+}
+

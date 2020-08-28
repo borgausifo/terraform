@@ -49,6 +49,30 @@ resource "aws_security_group" "alb" {
     }
 }
 
+resource "aws_security_group" "alb" {
+    name = "${var.cluster_name}-alb"
+}
+
+resource "aws_security_group" "allow_http_inboud" {
+    type = "ingress"
+    security_group_id = aws_security_group.alb.id
+
+    from_port = local.http_port
+    to_port = local.http_port
+    protocol = local.tcp_protocol
+    cidr_block = locl.all_ips
+}
+
+resource "aws_security_group" "allow_all_outbound" {
+    type = "egress"
+    security_group_id = aws_security_group.alb.id
+
+    from_port = local.http_port
+    to_port = local.http_port
+    protocol = local.tcp_protocol
+    cidr_block = locl.all_ips
+}
+
 resource "aws_launch_configuration" "example" {
     image_id = "ami-0c55b159cbfafe1f0"
     instance_type = var.instance_type
@@ -104,3 +128,12 @@ resource "aws_lb_listener" "http" {
     }
 }
 
+data "template_file" "user_data" {
+    template = file("${path.module}/user-data.sh")
+
+    vars = {
+        server_port = var.server_port
+        db_address = data.terraform_remote_state.db.outputs.address
+        db_port = data.terraform_remote_state.db.outputs.port
+    }
+}

@@ -16,3 +16,17 @@ module "webserver_cluster" {
 }
 
 
+module "webserver_cluster" {
+	source = "github.com/foo/modules/...?ref=v0.0.1"
+
+	cluster_name = "webserver-state"
+	db_remote_state_bucket = "..."
+	db_remote_state_key = "..."
+
+	instance_type = "t2.micro"
+	min_size = 2
+	max_size = 2
+}
+
+
+

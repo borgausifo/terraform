@@ -35,6 +35,7 @@ resource "aws_security_group" "alb" {
     name = "${var.cluster_name}-alb"
 
     ingress {
+        # Use of local variables
         from_port = local.http_port 
         to_port = local.http_port
         protocol = local.tcp_protocol
